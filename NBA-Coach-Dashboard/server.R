@@ -1,40 +1,53 @@
 library(shiny)
 library(fmsb)
 library(nbastatR)
+library(dplyr)
+library(magrittr)
 
 AVAILABLE_SEASONS =  c(2023)
 
-STATS_COLS = c( "trbPerGame", "astPerGame", "stlPerGame", "blkPerGame", "ptsPerGame")
+STATS_COLS = c("trbPerGame", "astPerGame", "stlPerGame", "blkPerGame", "ptsPerGame")
 RATING_COL = c("ratioPER")
 
-getPlayersDataFrame <- function (seasons){
+getPlayersDataFrame <- function (){
   players_stats = bref_players_stats(
     tables = c("advanced", "per_game"),
-    seasons = seasons,
+    seasons = 2023,
     assign_to_environment = FALSE
   )
   relevant_cols = c("namePlayer","minutes", "slugPosition", "agePlayer", "slugTeamBREF", "countGames", "isHOFPlayer", "slugTeamsBREF", "urlPlayerHeadshot", "ratioPER", "trbPerGame", "astPerGame", "stlPerGame", "blkPerGame", "ptsPerGame")
-  players_stats = players_stats[players_stats$minutes > 144,relevant_cols]
+  return(players_stats[players_stats$minutes > 144,relevant_cols])
 }
   
-getBestStats <- function(players_df, position=NULL){
-  if(position){
-    players_df %<>% filter(slugPosition==position)
+getBestStats <- function(players_df, team=NULL, position=NULL, stats_cols = STATS_COLS){
+  if(!is.null(position)){
+    players_df %<>% dplyr::filter(slugPosition==position)
   }
-  return(apply(players_df[,STATS_COLS], 2, function(x) max(x, na.rm = TRUE)))
+  if(!is.null(team)){
+    players_df %<>% dplyr::filter(slugTeamsBREF==team)
+  }
+  return(apply(players_df[,stats_cols], 2, function(x) max(x, na.rm = TRUE)))
 }
 
-getBestPlayer <- function(players_df, team, position){
-  filter(players_df, )
+getBestPlayer <- function(players_df, team=NULL, position=NULL, stat_col = RATING_COL){
+  if(!is.null(team)){
+    players_df %<>% dplyr::filter(slugTeamsBREF==team)
+  }
+  if(!is.null(position)){
+    players_df %<>% dplyr::filter(slugPosition==position)
+  }
+  mask = players_df[,stat_col] == getBestStats(players_df, team =team, position = position, stats_cols = stat_col)
+  return(players_df[mask,])
 }
 
-player_stat_spider_plot <- function(player_stats){
+player_stat_spider_plot <- function(player, stats_cols){
+  
   
 }
 
 function(input, output, session) {
   
-  players_df = getPlayersDataFrame(seasons = tail(AVAILABLE_SEASONS, 1))
+  players_df = getPlayersDataFrame()
 
   output$select_season <- renderUI({
       selectInput(
