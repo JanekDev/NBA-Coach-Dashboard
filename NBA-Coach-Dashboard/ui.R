@@ -9,9 +9,8 @@ library(flexdashboard)
 startingFivePage <- function(){
   sidebarLayout(
     sidebarPanel(
+     
       uiOutput("select_team"),
-      actionButton("update", "Change"),
-      hr()
     ),
     mainPanel(
       tableOutput("table")
@@ -31,7 +30,8 @@ shinyUI(
       tabPanel("Starting 5", startingFivePage()),
       tabPanel("Player matchup", playerMatchupPage()),
       tabPanel("Draft Picks", draftPicksPage()),
-      tabPanel("About", aboutPage())
+      tabPanel("About", aboutPage()),
+      uiOutput("select_season")
     )
   )
 )
