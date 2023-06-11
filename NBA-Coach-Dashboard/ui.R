@@ -32,8 +32,8 @@ playerMatchupPage <- function(){
     ),
     mainPanel(
       fluidRow(
-        column(5, uiOutput("select_matchup_left"), br(), plotOutput("player_matchup_left")),
-        column(5, uiOutput("select_matchup_right"), br(), plotOutput("player_matchup_right")),
+        column(5, uiOutput("select_matchup_left"), htmlOutput("image_matchup_left"), br(), plotOutput("player_matchup_left")),
+        column(5, uiOutput("select_matchup_right"), htmlOutput("image_matchup_right"), br(), plotOutput("player_matchup_right")),
       )
     )
   )

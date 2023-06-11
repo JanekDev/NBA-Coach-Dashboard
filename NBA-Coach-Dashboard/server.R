@@ -139,7 +139,7 @@ function(input, output, session) {
     )
   })
   
-  output$player_matchup_left <- renderPlot({ filter(players_df, namePlayer=input$select_matchup_left) %>% player_stats_spider_plot(stats_cols = input$select_stats)}) 
-  output$player_matchup_right <- renderPlot({ filter(players_df, namePlayer=input$select_matchup_right) %>% player_stats_spider_plot(stats_cols = input$select_stats)})
+  output$player_matchup_left <- renderPlot({ filter(players_df, namePlayer==input$select_matchup_left) %>% player_stats_spider_plot(stats_cols = input$select_stats)}) 
+  output$player_matchup_right <- renderPlot({ filter(players_df, namePlayer==input$select_matchup_right) %>% player_stats_spider_plot(stats_cols = input$select_stats)})
 }
 
