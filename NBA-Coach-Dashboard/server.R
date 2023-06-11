@@ -41,6 +41,9 @@ getStats <- function(players_df, team=NULL, position=NULL, stats_cols = STATS_CO
 }
 
 getBestPlayer <- function(players_df, team=NULL, position=NULL, stat_col = RATING_COL){
+  if(team == "TOT"){
+    team = NULL
+  }
   if(!is.null(team)){
     players_df %<>% dplyr::filter(slugTeamsBREF==team)
   }
@@ -57,7 +60,7 @@ getTeamsTotal <- function(PG,SG,PF,SF,C, stats_cols=STATS_COLS){
 
 player_stats_spider_plot <- function(player, best_stats, color="blue", stats_cols=STATS_COLS, type=0, mar=rep(0,4)){
   data <- rbind(
-    best_stats[,stats_cols],
+    best_stats[stats_cols],
     rep(0,length(stats_cols)),
     player[,stats_cols]
     )
@@ -86,7 +89,7 @@ function(input, output, session) {
     selectInput(
       "select_team",
       "Select Team",
-      choices = unique(players_df$slugTeamBREF),
+      choices = unique(players_df()[,"slugTeamBREF"]),
       #TODO label
       selected = "TOR"
     )
@@ -220,8 +223,7 @@ function(input, output, session) {
   output$starting_five_player_plot_team <- renderPlot({player_stats_spider_plot(starting_five_team(), best_stats_in_season())}, height=150)
   
   output$starting_five_team_table <- renderTable({
-    players_df %<>% dplyr::filter(slugTeamsBREF==input$select_team)
-    players_df[,c("namePlayer", "slugPosition", "agePlayer", "minutes", "countGames","ratioPER", "trbPerGame", "astPerGame", "stlPerGame", "blkPerGame", "ptsPerGame")]
+    players_df() %>% dplyr::filter(slugTeamsBREF==input$select_team) %>% select(c("namePlayer", "slugPosition", "agePlayer", "minutes", "countGames","ratioPER", "trbPerGame", "astPerGame", "stlPerGame", "blkPerGame", "ptsPerGame"))
   })
   
   #matchup
@@ -259,10 +261,10 @@ function(input, output, session) {
     )
   })
   
-  player_matchup_left <- reactive(dplyr::filter(players_df, namePlayer==input$select_matchup_left))
-  player_matchup_right <- reactive(dplyr::filter(players_df, namePlayer==input$select_matchup_right))
-  score_matchup_left <- reactive(player_matchup_left()[1,input$select_matchup_metric])
-  score_matchup_right <- reactive(player_matchup_right()[1,input$select_matchup_metric])
+  player_matchup_left <- reactive({players_df() %>% dplyr::filter(namePlayer==input$select_matchup_left)})
+  player_matchup_right <- reactive({players_df() %>% dplyr::filter(namePlayer==input$select_matchup_right)})
+  score_matchup_left <- reactive({player_matchup_left()[1,input$select_matchup_metric]})
+  score_matchup_right <- reactive({player_matchup_right()[1,input$select_matchup_metric]})
   
   output$image_matchup_left <- renderText({paste0('<img src="', player_matchup_left()[1,"urlPlayerHeadshot"] ,'">')})
   output$image_matchup_right <- renderText({paste0('<img src="', player_matchup_right()[1,"urlPlayerHeadshot"] ,'">')})
@@ -296,7 +298,7 @@ function(input, output, session) {
     )
   })
   
-  output$plot_player_matchup_left <- renderPlot({player_matchup_left() %>% player_stats_spider_plot(stats_cols = input$select_stats)}) 
-  output$plot_player_matchup_right <- renderPlot({player_matchup_right() %>% player_stats_spider_plot(stats_cols = input$select_stats)})
+  output$plot_player_matchup_left <- renderPlot({player_stats_spider_plot(player_matchup_left() ,best_stats_in_season(), stats_cols = input$select_stats)}) 
+  output$plot_player_matchup_right <- renderPlot({player_stats_spider_plot(player_matchup_right(), best_stats_in_season(), stats_cols = input$select_stats)})
 }
 
