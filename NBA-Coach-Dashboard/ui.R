@@ -40,8 +40,9 @@ playerMatchupPage <- function(){
         column(6, align="center",
                uiOutput("select_matchup_right"),
                htmlOutput("image_matchup_right"),
-               htmlOutput("card_score_matchup_left"),
-               plotOutput("player_matchup_right")),
+               htmlOutput("card_score_matchup_right"),
+               plotOutput("player_matchup_right")
+        ),
       )
     )
   )

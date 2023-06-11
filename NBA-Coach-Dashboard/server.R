@@ -57,15 +57,16 @@ player_stats_spider_plot <- function(player, color="blue", stats_cols=STATS_COLS
     rep(0,length(stats_cols)),
     player[,stats_cols]
     )
-
+  par(mar = c(0, 0, 0, 0))
   radarchart(
-    data, axistype =2,
+    data, axistype = 3,
     # Customize the polygon
     pcol = color, pfcol = scales::alpha(color, 0.5), plwd = 2, plty = 1,
     # Customize the grid
     cglcol = "grey", cglty = 1, cglwd = 0.8,
     # Customize the axis
-    axislabcol = "grey",
+    axislabcol = "blue",
+    
     vlabels = STATS_SLUGS[stats_cols]
   )
 }
@@ -78,10 +79,10 @@ getStartingFive <- function(players_df, team){
 }
 
 
+players_df = getPlayersDataFrame()
+
 function(input, output, session) {
   
-  players_df = getPlayersDataFrame()
-
   #starting_five
   output$select_season <- renderUI({
       selectInput(
@@ -139,7 +140,7 @@ function(input, output, session) {
       "select_matchup_left",
       "Select Left Player For Matchup",
       choices = unique(players_df$namePlayer),
-      selected = "Tyrese Haliburton"
+      selected = "Stephen Curry"
     )
   })
   output$select_matchup_right <- renderUI({
@@ -147,7 +148,7 @@ function(input, output, session) {
       "select_matchup_right",
       "Select Right Player For Matchup",
       choices = unique(players_df$namePlayer),
-      selected = "Davion Mitchell"
+      selected = "LeBron James"
     )
   })
   output$select_matchup_metric <- renderUI({
