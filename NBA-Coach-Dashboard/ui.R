@@ -42,7 +42,9 @@ startingFivePage <- function(){
                plotOutput("starting_five_player_plot_C")
         ),
         column(2, align="center",
+               br(),
                h4("TEAMS TOTAL"),
+               br(),
                plotOutput("starting_five_player_plot_team")
         )
       )
@@ -76,7 +78,15 @@ playerMatchupPage <- function(){
   )
 }
 draftPicksPage <- function(){}
-aboutPage <- function(){}
+aboutPage <- function(){
+  fluidPage(
+    img(src="PP_logotyp_ANG_CMYK.svg", align = "center"),
+    h3("This project was created as an assignment for Data visualisation course at Poznan Univeristy of Technology, under the supervision of Ph. D. Dariusz Brzeziński."),
+    h4("Source code of this project is publicly available on GitHub under MIT License:"),
+    markdown("https://github.com/JanekDev/NBA-Coach-Dashboard"),
+    markdown("Created by [Michał Wiliński](https://github.com/JanekDev) & [Łukasz Sztukiewicz](https://github.com/LukaszSztukiewicz)"),
+  )
+}
 
 shinyUI(
   fluidPage(
