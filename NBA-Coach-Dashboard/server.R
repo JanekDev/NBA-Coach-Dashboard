@@ -3,6 +3,9 @@ library(fmsb)
 library(nbastatR)
 library(dplyr)
 library(magrittr)
+library(bslib)
+
+Sys.setenv("VROOM_CONNECTION_SIZE"= 2000000)
 
 AVAILABLE_SEASONS =  c(2023)
 
@@ -13,6 +16,9 @@ names(STATS_COLS) <- STATS_FULL_NAMES
 names(STATS_SLUGS) <- STATS_COLS
 
 RATING_COL = c("ratioPER")
+names(RATING_COL) <- c("Ratio Per Game")
+
+RATING_COLS = c(STATS_COLS, RATING_COL)
 
 getPlayersDataFrame <- function (){
   players_stats = bref_players_stats(
@@ -90,16 +96,10 @@ function(input, output, session) {
         "Select Team",
         choices = unique(players_df$slugTeamBREF),
         #TODO label
+        selected = "TOR"
       )
     })
-  output$select_stats <- renderUI({
-    selectInput(
-      "select_stats",
-      "Select Statistics",
-      choices = STATS_COLS,
-      multiple = TRUE
-    )
-  })
+
   output$select_positions <- renderUI({
     selectInput(
       "select_positions",
@@ -123,12 +123,23 @@ function(input, output, session) {
   # output$starting_five_plot_SF <- renderPlot({ getBestPlayer(players_df, position="SF", team=input$select_team) %>% head(n=1) %>%  player_stats_spider_plot(stats_cols = input$select_stats)},height = 400, width = 600)
   # output$starting_five_plot_C <- renderPlot({ getBestPlayer(players_df, position="C", team=input$select_team) %>% head(n=1) %>% player_stats_spider_plot(stats_cols = input$select_stats)})
   # 
+  
   #matchup
+  output$select_stats <- renderUI({
+    selectInput(
+      "select_stats",
+      "Statistics",
+      choices = STATS_COLS,
+      selected = STATS_COLS,
+      multiple = TRUE
+    )
+  })
   output$select_matchup_left <- renderUI({
     selectInput(
       "select_matchup_left",
       "Select Left Player For Matchup",
       choices = unique(players_df$namePlayer),
+      selected = "Tyrese Haliburton"
     )
   })
   output$select_matchup_right <- renderUI({
@@ -136,6 +147,50 @@ function(input, output, session) {
       "select_matchup_right",
       "Select Right Player For Matchup",
       choices = unique(players_df$namePlayer),
+      selected = "Davion Mitchell"
+    )
+  })
+  output$select_matchup_metric <- renderUI({
+    selectInput(
+      "select_matchup_metric",
+      "Matchup Metric",
+      choices = c(RATING_COL,STATS_COLS),
+      selected = RATING_COL
+    )
+  })
+  
+  output$image_matchup_left <- renderText({paste0('<img src="', filter(players_df, namePlayer==input$select_matchup_left)[1,"urlPlayerHeadshot"] ,'">')})
+  output$image_matchup_right <- renderText({paste0('<img src="', filter(players_df, namePlayer==input$select_matchup_right)[1,"urlPlayerHeadshot"] ,'">')})
+  
+  score_matchup_left <- reactive(filter(players_df, namePlayer==input$select_matchup_left)[1,input$select_matchup_metric])
+  score_matchup_right <- reactive(filter(players_df, namePlayer==input$select_matchup_right)[1,input$select_matchup_metric])
+  
+  output$card_score_matchup_left <- renderUI({
+    card(
+      height = 50,
+      card_header(
+        class = if (score_matchup_right() < score_matchup_left()) "btn-success" else "btn-danger",
+        if (score_matchup_right() < score_matchup_left()) "WINNER" else "LOOSER",
+        
+      ),
+      card_body(
+        class = if (score_matchup_right() < score_matchup_left()) "bg-success" else "bg-danger",
+        paste("Score:", score_matchup_left(), sep = " ")
+      )
+    )
+    })
+  output$card_score_matchup_right <- renderUI({
+    card(
+      height = 50,
+      card_header(
+        class = if (score_matchup_right() > score_matchup_left()) "btn-success" else "btn-danger",
+        if (score_matchup_right() > score_matchup_left()) "WINNER" else "LOOSER",
+        
+      ),
+      card_body(
+        class = if (score_matchup_right() > score_matchup_left()) "bg-success" else "bg-danger",
+        paste("Score:", score_matchup_right(), sep = " ")
+      )
     )
   })
   

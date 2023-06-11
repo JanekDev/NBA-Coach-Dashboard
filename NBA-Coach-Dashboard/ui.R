@@ -1,8 +1,6 @@
 library(shiny)
-library(shinydashboard)
 library(shinythemes)
-library(plotly)
-library(flexdashboard)
+library(bslib)
 
 
 
@@ -27,13 +25,23 @@ startingFivePage <- function(){
 playerMatchupPage <- function(){
   sidebarLayout(
     sidebarPanel(
-      width = 2,
-      uiOutput("select_stats"),
+      width = 4,
+      uiOutput("select_matchup_metric"),
+      uiOutput("select_stats")
     ),
     mainPanel(
       fluidRow(
-        column(5, uiOutput("select_matchup_left"), htmlOutput("image_matchup_left"), br(), plotOutput("player_matchup_left")),
-        column(5, uiOutput("select_matchup_right"), htmlOutput("image_matchup_right"), br(), plotOutput("player_matchup_right")),
+        column(6, align="center",
+               uiOutput("select_matchup_left"),
+               htmlOutput("image_matchup_left"),
+               htmlOutput("card_score_matchup_left"),
+               plotOutput("player_matchup_left")
+        ),
+        column(6, align="center",
+               uiOutput("select_matchup_right"),
+               htmlOutput("image_matchup_right"),
+               htmlOutput("card_score_matchup_left"),
+               plotOutput("player_matchup_right")),
       )
     )
   )
