@@ -111,7 +111,7 @@ function(input, output, session) {
   # })
   
   output$starting_five_team_table <- renderTable({
-    players_df <- filter(players_df, slugTeamBREF==input$select_team)
+    players_df %<>% dplyr::filter(slugTeamsBREF==input$select_team),
     players_df[,input$select_stats]
   })
 
@@ -250,11 +250,14 @@ function(input, output, session) {
     )
   })
   
-  output$image_matchup_left <- renderText({paste0('<img src="', filter(players_df, namePlayer==input$select_matchup_left)[1,"urlPlayerHeadshot"] ,'">')})
-  output$image_matchup_right <- renderText({paste0('<img src="', filter(players_df, namePlayer==input$select_matchup_right)[1,"urlPlayerHeadshot"] ,'">')})
+  player_matchup_left <- reactive(dplyr::filter(players_df, namePlayer==input$select_matchup_left))
+  player_matchup_right <- reactive(dplyr::filter(players_df, namePlayer==input$select_matchup_right))
   
-  score_matchup_left <- reactive(filter(players_df, namePlayer==input$select_matchup_left)[1,input$select_matchup_metric])
-  score_matchup_right <- reactive(filter(players_df, namePlayer==input$select_matchup_right)[1,input$select_matchup_metric])
+  output$image_matchup_left <- renderText({paste0('<img src="', player_matchup_left()[1,"urlPlayerHeadshot"] ,'">')})
+  output$image_matchup_right <- renderText({paste0('<img src="', player_matchup_right()[1,"urlPlayerHeadshot"] ,'">')})
+  
+  score_matchup_left <- reactive(dplyr::filter(players_df, namePlayer==input$select_matchup_left)[1,input$select_matchup_metric])
+  score_matchup_right <- reactive(dplyr::filter(players_df, namePlayer==input$select_matchup_right)[1,input$select_matchup_metric])
   
   output$card_score_matchup_left <- renderUI({
     card(
@@ -285,7 +288,7 @@ function(input, output, session) {
     )
   })
   
-  output$player_matchup_left <- renderPlot({ filter(players_df, namePlayer==input$select_matchup_left) %>% player_stats_spider_plot(stats_cols = input$select_stats)}) 
-  output$player_matchup_right <- renderPlot({ filter(players_df, namePlayer==input$select_matchup_right) %>% player_stats_spider_plot(stats_cols = input$select_stats)})
+  output$plot_player_matchup_left <- renderPlot({player_matchup_left() %>% player_stats_spider_plot(stats_cols = input$select_stats)}) 
+  output$plot_player_matchup_right <- renderPlot({player_matchup_right() %>% player_stats_spider_plot(stats_cols = input$select_stats)})
 }
 
