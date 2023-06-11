@@ -6,8 +6,11 @@ library(bslib)
 
 startingFivePage <- function(){
   fluidPage(
-    fluidRow(
-      uiOutput("select_team"),
+    fluidRow(align = "center",
+             h4("Best starting squad based on Rating Per Game metric")
+    ),
+    fluidRow(align = "center",
+        uiOutput("select_team")
     ),
     fluidRow(
         fluidRow(
@@ -43,10 +46,17 @@ startingFivePage <- function(){
         ),
         column(2, align="center",
                br(),
-               h4("TEAMS TOTAL"),
+               h4("TEAM'S AVERGAGE"),
+               p("Calculated"),
                br(),
                plotOutput("starting_five_player_plot_team")
         )
+      ),
+      fluidRow(align = "center",
+               h3("Table of remaining players in the team")
+      ),
+      fluidRow(align="center",
+               tableOutput("starting_five_team_table")
       )
     )
   )
@@ -93,7 +103,7 @@ shinyUI(
     navbarPage(
       "NBA Coach Dashboard",
       theme = shinytheme("sandstone"),
-      tabPanel("Starting 5", startingFivePage()),
+      tabPanel("Starting Five", startingFivePage()),
       tabPanel("Player matchup", playerMatchupPage()),
       tabPanel("Draft Picks", draftPicksPage()),
       tabPanel("About", aboutPage()),

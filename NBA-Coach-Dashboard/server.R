@@ -110,10 +110,10 @@ function(input, output, session) {
   #   )
   # })
   
-  # output$table <- renderTable({
-  #   players_df <- filter(players_df, slugTeamBREF==input$select_team)
-  #   return(players_df[,input$select_stats])
-  # })
+  output$starting_five_team_table <- renderTable({
+    players_df <- filter(players_df, slugTeamBREF==input$select_team)
+    players_df[,input$select_stats]
+  })
 
   starting_five_player_PG <- reactive({getBestPlayer(players_df, position="PG", team=input$select_team) %>% head(n=1)})
   starting_five_player_SG <- reactive({getBestPlayer(players_df, position="SG", team=input$select_team) %>% head(n=1)})
