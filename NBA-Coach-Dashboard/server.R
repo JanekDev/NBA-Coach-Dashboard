@@ -51,33 +51,29 @@ getBestPlayer <- function(players_df, team=NULL, position=NULL, stat_col = RATIN
   return(players_df[mask,])
 }
 
-player_stats_spider_plot <- function(player, color="blue", stats_cols=STATS_COLS){
+player_stats_spider_plot <- function(player, color="blue", stats_cols=STATS_COLS, type=1, mar=rep(0,4)){
   data <- rbind(
     getStats(players_df, stats_cols = stats_cols), #get best statistics in season column wise
     rep(0,length(stats_cols)),
     player[,stats_cols]
     )
-  par(mar = c(0, 0, 0, 0))
+  par(mar = mar)
   radarchart(
-    data, axistype = 3,
+    data, axistype = type,
     # Customize the polygon
     pcol = color, pfcol = scales::alpha(color, 0.5), plwd = 2, plty = 1,
     # Customize the grid
     cglcol = "grey", cglty = 1, cglwd = 0.8,
-    # Customize the axis
-    axislabcol = "blue",
     
+    # Customize the axis
+    axislabcol = "grey",
     vlabels = STATS_SLUGS[stats_cols]
   )
 }
 
-getStartingFive <- function(players_df, team){
-  players_df %<>% dplyr::filter(slugTeamsBREF==team)
-  PG <- head(getBestPlayer(players_df, position="PG"), n=1)
-  SG <- head(getBestPlayer(players_df, position="SG"), n=1)
-  return(c("PG"=PG, "SG"=SG)) 
+starting_five_spider_plot <- function(player){
+  player_stats_spider_plot(player, type=0, mar=rep(0,4))
 }
-
 
 players_df = getPlayersDataFrame()
 
@@ -100,7 +96,6 @@ function(input, output, session) {
         selected = "TOR"
       )
     })
-
   output$select_positions <- renderUI({
     selectInput(
       "select_positions",
@@ -115,15 +110,54 @@ function(input, output, session) {
     players_df <- filter(players_df, slugTeamBREF==input$select_team)
     return(players_df[,input$select_stats])
   })
-  
-  starting_five <- reactive({getStartingFive(team=input$select_team)})
 
-  # output$starting_five_plot_PG <- renderPlot({ starting_five()["PG"] %>%  player_stats_spider_plot(stats_cols = input$select_stats)})
-  # output$starting_five_plot_SG <- renderPlot({ starting_five("SG") %>%  player_stats_spider_plot(stats_cols = input$select_stats)})
-  # output$starting_five_plot_PF <- renderPlot({ getBestPlayer(players_df, position="PF", team=input$select_team) %>% head(n=1) %>%  player_stats_spider_plot(stats_cols = input$select_stats)},height = 400, width = 600)
-  # output$starting_five_plot_SF <- renderPlot({ getBestPlayer(players_df, position="SF", team=input$select_team) %>% head(n=1) %>%  player_stats_spider_plot(stats_cols = input$select_stats)},height = 400, width = 600)
-  # output$starting_five_plot_C <- renderPlot({ getBestPlayer(players_df, position="C", team=input$select_team) %>% head(n=1) %>% player_stats_spider_plot(stats_cols = input$select_stats)})
-  # 
+  starting_five_player_PG <- reactive({getBestPlayer(players_df, position="PG", team=input$select_team) %>% head(n=1)})
+  starting_five_player_SG <- reactive({getBestPlayer(players_df, position="SG", team=input$select_team) %>% head(n=1)})
+  starting_five_player_PF <- reactive({getBestPlayer(players_df, position="PF", team=input$select_team) %>% head(n=1)})
+  starting_five_player_SF <- reactive({getBestPlayer(players_df, position="SF", team=input$select_team) %>% head(n=1)})
+  starting_five_player_C <- reactive({getBestPlayer(players_df, position="C", team=input$select_team) %>% head(n=1)})
+  
+  output$starting_five_player_info_PG <- renderUI({
+    card(
+      h4(starting_five_player_PG()[,"namePlayer"]),
+      renderText(paste0(
+        "Age: ",
+        starting_five_player_PG()[, c("agePlayer")],
+        "Total number of minutes:",
+        starting_five_player_PG()[, c("minutes")],
+        "Total number of games:",
+        starting_five_player_PG()[, c("countGames")],
+        "Position: ",
+        starting_five_player_PG()[, c("slugPosition")],
+        sep="\n")),
+      renderPlot({starting_five_spider_plot(starting_five_player_PG())})
+    )
+  })
+  output$starting_five_player_info_SG <- renderUI({
+    card(
+      h4(paste(starting_five_player_SG()[, "namePlayer"])),
+      renderPlot({starting_five_spider_plot(starting_five_player_SG())})
+    )
+  })
+  output$starting_five_player_info_PF <- renderUI({
+    card(
+      h4(paste(starting_five_player_PF()[, "namePlayer"])),
+      renderPlot({starting_five_spider_plot(starting_five_player_PF())})
+    )
+  })
+  output$starting_five_player_info_SF <- renderUI({
+    card(
+      h4(paste(starting_five_player_SF()[, "namePlayer"])),
+      renderPlot({starting_five_spider_plot(starting_five_player_SF())})
+    )
+  })
+  output$starting_five_player_info_C <- renderUI({
+    card(
+      h4(paste(starting_five_player_C()[, "namePlayer"])),
+      renderPlot({starting_five_spider_plot(starting_five_player_C())})
+    )
+  })
+  
   
   #matchup
   output$select_stats <- renderUI({

@@ -12,11 +12,11 @@ startingFivePage <- function(){
     ),
     mainPanel(
       fluidRow(
-        # column(10, h4("TEXT"), br(), plotOutput("starting_five_plot_PG")),
-        # column(10, h4("TEXT"), br(), plotOutput("starting_five_plot_SG")),
-        # column(2, h4("TEXT"), br(), plotOutput("starting_five_plot_PF")),
-        # column(2, h4("TEXT"), br(), plotOutput("starting_five_plot_SF")),
-        # column(2, h4("TEXT"), br(), plotOutput("starting_five_plot_C"))
+        column(2, htmlOutput("starting_five_player_image_PG"),  htmlOutput("starting_five_player_info_PG")),
+        column(2, htmlOutput("starting_five_player_info_SG")),
+        column(2, htmlOutput("starting_five_player_info_PF")),
+        column(2, htmlOutput("starting_five_player_info_SF")),
+        column(2, htmlOutput("starting_five_player_info_c")),
       )
     )
   )
