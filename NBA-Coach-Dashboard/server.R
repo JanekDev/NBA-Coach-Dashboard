@@ -80,36 +80,36 @@ players_df = getPlayersDataFrame()
 function(input, output, session) {
   
   #starting_five
-  output$select_season <- renderUI({
-      selectInput(
-        "select_season",
-        "Select Season",
-        AVAILABLE_SEASONS
-      )
-    })
   output$select_team <- renderUI({
-      selectInput(
-        "select_team",
-        "Select Team",
-        choices = unique(players_df$slugTeamBREF),
-        #TODO label
-        selected = "TOR"
-      )
-    })
-  output$select_positions <- renderUI({
     selectInput(
-      "select_positions",
-      "Select Positions",
-      choices = unique(players_df$slugPosition),
+      "select_team",
+      "Select Team",
+      choices = unique(players_df$slugTeamBREF),
       #TODO label
-      multiple = TRUE
+      selected = "TOR"
     )
   })
+  # output$select_season <- renderUI({
+  #     selectInput(
+  #       "select_season",
+  #       "Select Season",
+  #       AVAILABLE_SEASONS
+  #     )
+  #   })
+  # output$select_positions <- renderUI({
+  #   selectInput(
+  #     "select_positions",
+  #     "Select Positions",
+  #     choices = unique(players_df$slugPosition),
+  #     #TODO label
+  #     multiple = TRUE
+  #   )
+  # })
   
-  output$table <- renderTable({
-    players_df <- filter(players_df, slugTeamBREF==input$select_team)
-    return(players_df[,input$select_stats])
-  })
+  # output$table <- renderTable({
+  #   players_df <- filter(players_df, slugTeamBREF==input$select_team)
+  #   return(players_df[,input$select_stats])
+  # })
 
   starting_five_player_PG <- reactive({getBestPlayer(players_df, position="PG", team=input$select_team) %>% head(n=1)})
   starting_five_player_SG <- reactive({getBestPlayer(players_df, position="SG", team=input$select_team) %>% head(n=1)})
@@ -117,47 +117,94 @@ function(input, output, session) {
   starting_five_player_SF <- reactive({getBestPlayer(players_df, position="SF", team=input$select_team) %>% head(n=1)})
   starting_five_player_C <- reactive({getBestPlayer(players_df, position="C", team=input$select_team) %>% head(n=1)})
   
+  output$starting_five_player_name_PG <- renderText({paste(starting_five_player_PG()[,"namePlayer"])})
+  output$starting_five_player_name_SG <- renderText({paste(starting_five_player_SG()[,"namePlayer"])})
+  output$starting_five_player_name_PF <- renderText({paste(starting_five_player_PF()[,"namePlayer"])})
+  output$starting_five_player_name_SF <- renderText({paste(starting_five_player_SF()[,"namePlayer"])})
+  output$starting_five_player_name_C <- renderText({paste(starting_five_player_C()[,"namePlayer"])})
+  
+  output$starting_five_player_image_PG <-  renderText({paste0('<img height="80" src="', starting_five_player_PG()[,"urlPlayerHeadshot"] ,'">')})
+  output$starting_five_player_image_SG <-  renderText({paste0('<img height="80" src="', starting_five_player_SG()[,"urlPlayerHeadshot"] ,'">')})
+  output$starting_five_player_image_PF <-  renderText({paste0('<img height="80" src="', starting_five_player_PF()[,"urlPlayerHeadshot"] ,'">')})
+  output$starting_five_player_image_SF <-  renderText({paste0('<img height="80" src="', starting_five_player_SF()[,"urlPlayerHeadshot"] ,'">')})
+  output$starting_five_player_image_C <-  renderText({paste0('<img height="80" src="', starting_five_player_C()[,"urlPlayerHeadshot"] ,'">')})
+  
   output$starting_five_player_info_PG <- renderUI({
     card(
-      h4(starting_five_player_PG()[,"namePlayer"]),
-      renderText(paste0(
-        "Age: ",
-        starting_five_player_PG()[, c("agePlayer")],
-        "Total number of minutes:",
-        starting_five_player_PG()[, c("minutes")],
-        "Total number of games:",
-        starting_five_player_PG()[, c("countGames")],
-        "Position: ",
-        starting_five_player_PG()[, c("slugPosition")],
-        sep="\n")),
-      renderPlot({starting_five_spider_plot(starting_five_player_PG())})
+      card_header(
+        class = "btn-primary",
+        renderText(paste0("Position: ",starting_five_player_PG()[, c("slugPosition")]),),
+      ),
+      card_body(
+        class = "btn-secondary",
+        renderText(paste0("Age: ", starting_five_player_PG()[, c("agePlayer")])),
+        # renderText(paste0("Total number of minutes:", starting_five_player_PG()[, c("minutes")])),
+        # renderText(paste0("Total number of games:", starting_five_player_PG()[, c("countGames")])),
+      )
     )
   })
   output$starting_five_player_info_SG <- renderUI({
     card(
-      h4(paste(starting_five_player_SG()[, "namePlayer"])),
-      renderPlot({starting_five_spider_plot(starting_five_player_SG())})
+      card_header(
+        class = "btn-primary",
+        renderText(paste0("Position: ",starting_five_player_SG()[, c("slugPosition")]),),
+      ),
+      card_body(
+        class = "btn-secondary",
+        renderText(paste0("Age: ", starting_five_player_SG()[, c("agePlayer")])),
+        # renderText(paste0("Total number of minutes:", starting_five_player_PG()[, c("minutes")])),
+        # renderText(paste0("Total number of games:", starting_five_player_PG()[, c("countGames")])),
+      )
     )
   })
   output$starting_five_player_info_PF <- renderUI({
     card(
-      h4(paste(starting_five_player_PF()[, "namePlayer"])),
-      renderPlot({starting_five_spider_plot(starting_five_player_PF())})
+      card_header(
+        class = "btn-primary",
+        renderText(paste0("Position: ",starting_five_player_PF()[, c("slugPosition")]),),
+      ),
+      card_body(
+        class = "btn-secondary",
+        renderText(paste0("Age: ", starting_five_player_PF()[, c("agePlayer")])),
+        # renderText(paste0("Total number of minutes:", starting_five_player_PG()[, c("minutes")])),
+        # renderText(paste0("Total number of games:", starting_five_player_PG()[, c("countGames")])),
+      )
     )
   })
   output$starting_five_player_info_SF <- renderUI({
     card(
-      h4(paste(starting_five_player_SF()[, "namePlayer"])),
-      renderPlot({starting_five_spider_plot(starting_five_player_SF())})
+      card_header(
+        class = "btn-primary",
+        renderText(paste0("Position: ",starting_five_player_SF()[, c("slugPosition")]),),
+      ),
+      card_body(
+        class = "btn-secondary",
+        renderText(paste0("Age: ", starting_five_player_SF()[, c("agePlayer")])),
+        # renderText(paste0("Total number of minutes:", starting_five_player_PG()[, c("minutes")])),
+        # renderText(paste0("Total number of games:", starting_five_player_PG()[, c("countGames")])),
+      )
     )
   })
   output$starting_five_player_info_C <- renderUI({
     card(
-      h4(paste(starting_five_player_C()[, "namePlayer"])),
-      renderPlot({starting_five_spider_plot(starting_five_player_C())})
+      card_header(
+        class = "btn-primary",
+        renderText(paste0("Position: ",starting_five_player_C()[, c("slugPosition")]),),
+      ),
+      card_body(
+        class = "btn-secondary",
+        renderText(paste0("Age: ", starting_five_player_C()[, c("agePlayer")])),
+        # renderText(paste0("Total number of minutes:", starting_five_player_PG()[, c("minutes")])),
+        # renderText(paste0("Total number of games:", starting_five_player_PG()[, c("countGames")])),
+      )
     )
   })
   
+  output$starting_five_player_plot_PG <- renderPlot({starting_five_spider_plot(starting_five_player_PG())}, height=150)
+  output$starting_five_player_plot_SG <- renderPlot({starting_five_spider_plot(starting_five_player_SG())}, height=150)
+  output$starting_five_player_plot_PF <- renderPlot({starting_five_spider_plot(starting_five_player_PF())}, height=150)
+  output$starting_five_player_plot_SF <- renderPlot({starting_five_spider_plot(starting_five_player_SF())}, height=150)
+  output$starting_five_player_plot_C <- renderPlot({starting_five_spider_plot(starting_five_player_C())}, height=150)
   
   #matchup
   output$select_stats <- renderUI({
