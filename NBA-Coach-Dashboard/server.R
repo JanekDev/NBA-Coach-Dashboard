@@ -51,6 +51,10 @@ getBestPlayer <- function(players_df, team=NULL, position=NULL, stat_col = RATIN
   return(players_df[mask,])
 }
 
+getTeamTotal <- function(PG,SG,PF,SF,C, stats_cols=STATS_COLS){
+  starting_five_spider_plot((PG+SG+PF+SF+C)/5)
+}
+
 player_stats_spider_plot <- function(player, color="blue", stats_cols=STATS_COLS, type=1, mar=rep(0,4)){
   data <- rbind(
     getStats(players_df, stats_cols = stats_cols), #get best statistics in season column wise
@@ -129,6 +133,7 @@ function(input, output, session) {
   output$starting_five_player_image_SF <-  renderText({paste0('<img height="80" src="', starting_five_player_SF()[,"urlPlayerHeadshot"] ,'">')})
   output$starting_five_player_image_C <-  renderText({paste0('<img height="80" src="', starting_five_player_C()[,"urlPlayerHeadshot"] ,'">')})
   
+  
   output$starting_five_player_info_PG <- renderUI({
     card(
       card_header(
@@ -205,6 +210,10 @@ function(input, output, session) {
   output$starting_five_player_plot_PF <- renderPlot({starting_five_spider_plot(starting_five_player_PF())}, height=150)
   output$starting_five_player_plot_SF <- renderPlot({starting_five_spider_plot(starting_five_player_SF())}, height=150)
   output$starting_five_player_plot_C <- renderPlot({starting_five_spider_plot(starting_five_player_C())}, height=150)
+  output$starting_five_player_plot_team <- renderPlot({
+    starting_five_spider_plot(
+      (starting_five_player_PG()[,STATS_COLS] + starting_five_player_SG()[,STATS_COLS] + starting_five_player_PF()[,STATS_COLS] + starting_five_player_SF()[,STATS_COLS] + starting_five_player_C()[,STATS_COLS])/5
+    )}, height=150)
   
   #matchup
   output$select_stats <- renderUI({

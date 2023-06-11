@@ -40,6 +40,10 @@ startingFivePage <- function(){
                htmlOutput("starting_five_player_image_C"),
                htmlOutput("starting_five_player_info_C"),
                plotOutput("starting_five_player_plot_C")
+        ),
+        column(2, align="center",
+               h4("TEAMS TOTAL"),
+               plotOutput("starting_five_player_plot_team")
         )
       )
     )
