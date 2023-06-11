@@ -2,6 +2,7 @@ library(shiny)
 library(shinythemes)
 library(bslib)
 library(DT)
+library(plotly)
 
 startingFivePage <- function(){
   fluidPage(

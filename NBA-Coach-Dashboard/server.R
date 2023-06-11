@@ -1,6 +1,5 @@
 library(shiny)
 library(fmsb)
-library(nbastatR)
 library(dplyr)
 library(magrittr)
 library(bslib)
@@ -10,6 +9,7 @@ Sys.setenv("VROOM_CONNECTION_SIZE"= 2000000)
 
 AVAILABLE_SEASONS =  c(2023)
 HOFlogo = "https://upload.wikimedia.org/wikipedia/fr/3/3d/Basketball_Hall_of_Fame_%28logo%29.png"
+RELEVANT_COLS = c("namePlayer","minutes", "slugPosition", "agePlayer", "slugTeamBREF", "countGames", "isHOFPlayer", "slugTeamsBREF", "urlPlayerHeadshot", "ratioPER", "trbPerGame", "astPerGame", "stlPerGame", "blkPerGame", "ptsPerGame")
 STATS_COLS = c("trbPerGame",  "astPerGame",  "stlPerGame","blkPerGame", "ptsPerGame")
 STATS_FULL_NAMES = c("Rebounds Per Game",  "Assits Per Game",  "Steals Per Game","Blocks Per Game", "Points Per Game")
 STATS_SLUGS = c("RPG",  "APG",  "SPG",  "BPG",  "PPG")
@@ -21,16 +21,16 @@ names(RATING_COL) <- c("Ratio Per Game")
 
 RATING_COLS = c(STATS_COLS, RATING_COL, "agePlayer")
 
-getPlayersDataFrame <- function (season = 2023){
-  players_stats = bref_players_stats(
-    tables = c("advanced", "per_game"),
-    seasons = season,
-    assign_to_environment = FALSE
-  )
-  relevant_cols = c("namePlayer","minutes", "slugPosition", "agePlayer", "slugTeamBREF", "countGames", "isHOFPlayer", "slugTeamsBREF", "urlPlayerHeadshot", "ratioPER", "trbPerGame", "astPerGame", "stlPerGame", "blkPerGame", "ptsPerGame")
-  return(players_stats[players_stats$minutes > 144,relevant_cols])
-}
-  
+# getPlayersDataFrame <- function (season = 2023){
+#   players_stats = bref_players_stats(
+#     tables = c("advanced", "per_game"),
+#     seasons = season,
+#     assign_to_environment = FALSE
+#   )
+#   relevant_cols = RELEVANT_COLS
+#   return(players_stats[players_stats$minutes > 144,relevant_cols])
+# }
+
 getStats <- function(players_df, team=NULL, position=NULL, stats_cols = STATS_COLS, fun = function(x) max(x, na.rm = TRUE)){
   if(!is.null(position)){
     players_df %<>% dplyr::filter(slugPosition==position)
@@ -86,6 +86,10 @@ getBestScorers <- function(season_range) {
   relevant_cols <- c("namePlayer", "minutes", "slugSeason", "slugPosition", "agePlayer", "slugTeamBREF", "countGames", "isHOFPlayer", "slugTeamsBREF", "urlPlayerHeadshot", "ratioPER", "pctFG", "ptsPerGame", "trbPerGame", "astPerGame", "stlPerGame", "blkPerGame")
   players_stats <- players_stats[, relevant_cols]
   return(players_stats)
+}
+
+getPlayersDataFrame <- function (season = 2023){
+  tibble(getBestScorers(c(season,season)))[,RELEVANT_COLS]
 }
 
 axisLabels <- list(
@@ -222,11 +226,11 @@ function(input, output, session) {
   output$starting_five_player_name_SF <- renderText({paste(starting_five_player_SF()[,"namePlayer"])})
   output$starting_five_player_name_C <- renderText({paste(starting_five_player_C()[,"namePlayer"])})
   
-  output$starting_five_player_image_PG <-  renderText({paste0('<img height="80" src="', starting_five_player_PG()[,"urlPlayerHeadshot"] ,'">')})
-  output$starting_five_player_image_SG <-  renderText({paste0('<img height="80" src="', starting_five_player_SG()[,"urlPlayerHeadshot"] ,'">')})
-  output$starting_five_player_image_PF <-  renderText({paste0('<img height="80" src="', starting_five_player_PF()[,"urlPlayerHeadshot"] ,'">')})
-  output$starting_five_player_image_SF <-  renderText({paste0('<img height="80" src="', starting_five_player_SF()[,"urlPlayerHeadshot"] ,'">')})
-  output$starting_five_player_image_C <-  renderText({paste0('<img height="80" src="', starting_five_player_C()[,"urlPlayerHeadshot"] ,'">')})
+  output$starting_five_player_image_PG <-  renderText({paste0('<img height="80" onerror="this.src=', defaultMugshot, '" src="', starting_five_player_PG()[,"urlPlayerHeadshot"] ,'">')})
+  output$starting_five_player_image_SG <-  renderText({paste0('<img height="80" onerror="this.src=', defaultMugshot, '" src="', starting_five_player_SG()[,"urlPlayerHeadshot"] ,'">')})
+  output$starting_five_player_image_PF <-  renderText({paste0('<img height="80" onerror="this.src=', defaultMugshot, '" src="', starting_five_player_PF()[,"urlPlayerHeadshot"] ,'">')})
+  output$starting_five_player_image_SF <-  renderText({paste0('<img height="80" onerror="this.src=', defaultMugshot, '" src="', starting_five_player_SF()[,"urlPlayerHeadshot"] ,'">')})
+  output$starting_five_player_image_C <-  renderText({paste0('<img height="80"  onerror="this.src=', defaultMugshot, '" src="', starting_five_player_C()[,"urlPlayerHeadshot"] ,'">')})
   
   output$starting_five_player_info_PG <- renderUI({
     card(
