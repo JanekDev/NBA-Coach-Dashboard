@@ -7,10 +7,15 @@ library(bslib)
 startingFivePage <- function(){
   fluidPage(
     fluidRow(align = "center",
-             h4("Best starting squad based on Rating Per Game metric")
+             h4("Best starting five squad based on Player Efficiency Rating (PER) metric")
     ),
     fluidRow(align = "center",
-        uiOutput("select_team")
+          column(4,
+                  uiOutput("select_team"),
+          ),
+          column(8,
+                 sliderInput("select_season", "Pick Season:", min = 1952, max = 2023, value = c(2023), width="100%", sep="")
+          )
     ),
     fluidRow(
         fluidRow(
@@ -18,42 +23,40 @@ startingFivePage <- function(){
                 textOutput("starting_five_player_name_PG"),
                 htmlOutput("starting_five_player_image_PG"),
                 htmlOutput("starting_five_player_info_PG"),
-                plotOutput("starting_five_player_plot_PG")
+                plotOutput("starting_five_player_plot_PG",height = "100%")
                ),
         column(2, align="center",
                textOutput("starting_five_player_name_SG"),
                htmlOutput("starting_five_player_image_SG"),
                htmlOutput("starting_five_player_info_SG"),
-               plotOutput("starting_five_player_plot_SG")
+               plotOutput("starting_five_player_plot_SG",height = "100%")
         ),
         column(2, align="center",
                textOutput("starting_five_player_name_PF"),
                htmlOutput("starting_five_player_image_PF"),
                htmlOutput("starting_five_player_info_PF"),
-               plotOutput("starting_five_player_plot_PF")
+               plotOutput("starting_five_player_plot_PF",height = "100%")
         ),
         column(2, align="center",
                textOutput("starting_five_player_name_SF"),
                htmlOutput("starting_five_player_image_SF"),
                htmlOutput("starting_five_player_info_SF"),
-               plotOutput("starting_five_player_plot_SF")
+               plotOutput("starting_five_player_plot_SF",height = "100%")
         ),
         column(2, align="center",
                textOutput("starting_five_player_name_C"),
                htmlOutput("starting_five_player_image_C"),
                htmlOutput("starting_five_player_info_C"),
-               plotOutput("starting_five_player_plot_C")
+               plotOutput("starting_five_player_plot_C",height = "100%")
         ),
         column(2, align="center",
-               br(),
-               h4("TEAM'S AVERGAGE"),
-               p("Calculated"),
-               br(),
-               plotOutput("starting_five_player_plot_team")
+               htmlOutput("starting_five_team_info"),
+               p("TEAM'S AVERGAGE STATS"),
+               plotOutput("starting_five_player_plot_team",height = "100%")
         )
       ),
       fluidRow(align = "center",
-               h3("Table of remaining players in the team")
+               h3("Table of total players in the team")
       ),
       fluidRow(align="center",
                tableOutput("starting_five_team_table")
