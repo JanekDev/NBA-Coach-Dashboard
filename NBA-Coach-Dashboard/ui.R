@@ -1,6 +1,7 @@
 library(shiny)
 library(shinythemes)
 library(bslib)
+library(DT)
 
 
 
@@ -51,15 +52,14 @@ startingFivePage <- function(){
         ),
         column(2, align="center",
                htmlOutput("starting_five_team_info"),
-               p("TEAM'S AVERGAGE STATS"),
-               plotOutput("starting_five_player_plot_team",height = "100%")
+               plotOutput("starting_five_player_plot_team", height = "100%")
         )
       ),
       fluidRow(align = "center",
-               h3("Table of total players in the team")
+               h3("All players in the team")
       ),
       fluidRow(align="center",
-               tableOutput("starting_five_team_table")
+               DT::dataTableOutput("starting_five_team_table")
       )
     )
   )

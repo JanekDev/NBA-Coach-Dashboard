@@ -4,6 +4,7 @@ library(nbastatR)
 library(dplyr)
 library(magrittr)
 library(bslib)
+library(DT)
 
 Sys.setenv("VROOM_CONNECTION_SIZE"= 2000000)
 
@@ -18,7 +19,7 @@ names(STATS_SLUGS) <- STATS_COLS
 RATING_COL = c("ratioPER")
 names(RATING_COL) <- c("Ratio Per Game")
 
-RATING_COLS = c(STATS_COLS, RATING_COL)
+RATING_COLS = c(STATS_COLS, RATING_COL, "agePlayer")
 
 getPlayersDataFrame <- function (season = 2023){
   players_stats = bref_players_stats(
@@ -58,7 +59,7 @@ getTeamsTotal <- function(PG,SG,PF,SF,C, stats_cols=STATS_COLS){
   (PG[,stats_cols] + SG[,stats_cols] + PF[,stats_cols] + SF[,stats_cols] + C[,stats_cols])/5
 }
 
-player_stats_spider_plot <- function(player, best_stats, color="blue", stats_cols=STATS_COLS, type=0, mar=rep(0,4)){
+player_stats_spider_plot <- function(player, best_stats, color=c("blue", "yellow"), stats_cols=STATS_COLS, type=0, mar=rep(0,4)){
   data <- rbind(
     best_stats[stats_cols],
     rep(0,length(stats_cols)),
@@ -83,6 +84,7 @@ function(input, output, session) {
   players_df = reactive(getPlayersDataFrame(input$select_season))
   
   best_stats_in_season <- reactive(getStats(players_df()))
+  avg_stats_in_season <- reactive(getStats(players_df(), fun = function(x) mean(x)))
   
   #starting_five
   output$select_team <- renderUI({
@@ -107,7 +109,7 @@ function(input, output, session) {
       starting_five_player_PF(),
       starting_five_player_SF(),
       starting_five_player_C(),
-      stats_cols = STATS_COLS
+      stats_cols = RATING_COLS
   )
   })
   
@@ -134,7 +136,8 @@ function(input, output, session) {
         renderText(paste0("Age: ", starting_five_player_PG()[, c("agePlayer")])),
         #renderText(paste0("Total number of minutes:", starting_five_player_PG()[, c("minutes")])),
         # renderText(paste0("Games:", starting_five_player_PG()[, c("countGames")]))
-        renderText(paste0("PER:", starting_five_player_PG()[, c("ratioPER")]))
+        renderText(paste0("PER:", starting_five_player_PG()[, c("ratioPER")])),
+        renderText(paste0("Points:", starting_five_player_PG()[, c("ptsPerGame")]))
       )
     )
   })
@@ -149,7 +152,8 @@ function(input, output, session) {
         renderText(paste0("Age: ", starting_five_player_SG()[, c("agePlayer")])),
         # renderText(paste0("Total number of minutes:", starting_five_player_PG()[, c("minutes")])),
         # renderText(paste0("Total number of games:", starting_five_player_PG()[, c("countGames")])),
-        renderText(paste0("PER:", starting_five_player_SG()[, c("ratioPER")]))
+        renderText(paste0("PER:", starting_five_player_SG()[, c("ratioPER")])),
+        renderText(paste0("Points:", starting_five_player_SG()[, c("ptsPerGame")]))
       )
     )
   })
@@ -164,7 +168,8 @@ function(input, output, session) {
         renderText(paste0("Age: ", starting_five_player_PF()[, c("agePlayer")])),
         # renderText(paste0("Total number of minutes:", starting_five_player_PG()[, c("minutes")])),
         # renderText(paste0("Total number of games:", starting_five_player_PG()[, c("countGames")])),
-        renderText(paste0("PER:", starting_five_player_PF()[, c("ratioPER")]))
+        renderText(paste0("PER:", starting_five_player_PF()[, c("ratioPER")])),
+        renderText(paste0("Points:", starting_five_player_PF()[, c("ptsPerGame")]))
       )
     )
   })
@@ -179,7 +184,8 @@ function(input, output, session) {
         renderText(paste0("Age: ", starting_five_player_SF()[, c("agePlayer")])),
         # renderText(paste0("Total number of minutes:", starting_five_player_PG()[, c("minutes")])),
         # renderText(paste0("Total number of games:", starting_five_player_PG()[, c("countGames")])),
-        renderText(paste0("PER:", starting_five_player_SF()[, c("ratioPER")]))
+        renderText(paste0("PER:", starting_five_player_SF()[, c("ratioPER")])),
+        renderText(paste0("Points:", starting_five_player_SF()[, c("ptsPerGame")]))
       )
     )
   })
@@ -194,7 +200,8 @@ function(input, output, session) {
         renderText(paste0("Age: ", starting_five_player_C()[, c("agePlayer")])),
         # renderText(paste0("Total number of minutes:", starting_five_player_PG()[, c("minutes")])),
         # renderText(paste0("Total number of games:", starting_five_player_PG()[, c("countGames")])),
-        renderText(paste0("PER:", starting_five_player_C()[, c("ratioPER")]))
+        renderText(paste0("PER:", starting_five_player_C()[, c("ratioPER")])),
+        renderText(paste0("Points:", starting_five_player_C()[, c("ptsPerGame")]))
       )
     )
   })
@@ -202,15 +209,15 @@ function(input, output, session) {
     card(
       card_header(
         class = "btn-primary",
-        "TEAM'S SCORE"
+        "SQUAD'S AVERGAGE"
       ),
       card_body(
         class = "bg-info",
         renderText(paste0("Age: ", starting_five_team()[, c("agePlayer")])),
         # renderText(paste0("Total number of minutes:", starting_five_player_PG()[, c("minutes")])),
-        # renderText(paste0("Total number of games:", starting_five_player_PG()[, c("countGames")])),
+        # renderText(paste0("Games:", starting_five_player_PG()[, c("countGames")])),
         renderText(paste0("PER:", starting_five_team()[, c("ratioPER")])),
-        renderText(paste0("Mean points:", starting_five_team()[, c("ptsPerGame")]))
+        renderText(paste0("Points:", starting_five_team()[, c("ptsPerGame")]))
       )
     )
   })
@@ -220,10 +227,12 @@ function(input, output, session) {
   output$starting_five_player_plot_PF <- renderPlot({player_stats_spider_plot(starting_five_player_PF(), best_stats_in_season())}, height=150)
   output$starting_five_player_plot_SF <- renderPlot({player_stats_spider_plot(starting_five_player_SF(), best_stats_in_season())}, height=150)
   output$starting_five_player_plot_C <- renderPlot({player_stats_spider_plot(starting_five_player_C(), best_stats_in_season())}, height=150)
-  output$starting_five_player_plot_team <- renderPlot({player_stats_spider_plot(starting_five_team(), best_stats_in_season())}, height=150)
+  output$starting_five_player_plot_team <- renderPlot({player_stats_spider_plot(rbind(starting_five_team(), avg_stats_in_season()), best_stats_in_season())}, height=150)
   
-  output$starting_five_team_table <- renderTable({
-    players_df() %>% dplyr::filter(slugTeamsBREF==input$select_team) %>% select(c("namePlayer", "slugPosition", "agePlayer", "minutes", "countGames","ratioPER", "trbPerGame", "astPerGame", "stlPerGame", "blkPerGame", "ptsPerGame"))
+  output$starting_five_team_table <- DT::renderDataTable({
+    players_df() %>% 
+      dplyr::filter(slugTeamsBREF==input$select_team) %>% 
+      select(c("namePlayer", "slugPosition", "agePlayer", "minutes", "countGames","ratioPER", "trbPerGame", "astPerGame", "stlPerGame", "blkPerGame", "ptsPerGame"))
   })
   
   #matchup
@@ -240,7 +249,7 @@ function(input, output, session) {
     selectInput(
       "select_matchup_left",
       "Select Left Player For Matchup",
-      choices = unique(players_df$namePlayer),
+      choices = unique(players_df()[,"namePlayer"]),
       selected = "Stephen Curry"
     )
   })
@@ -248,7 +257,7 @@ function(input, output, session) {
     selectInput(
       "select_matchup_right",
       "Select Right Player For Matchup",
-      choices = unique(players_df$namePlayer),
+      choices = unique(players_df()[,"namePlayer"]),
       selected = "LeBron James"
     )
   })
@@ -298,7 +307,7 @@ function(input, output, session) {
     )
   })
   
-  output$plot_player_matchup_left <- renderPlot({player_stats_spider_plot(player_matchup_left() ,best_stats_in_season(), stats_cols = input$select_stats)}) 
-  output$plot_player_matchup_right <- renderPlot({player_stats_spider_plot(player_matchup_right(), best_stats_in_season(), stats_cols = input$select_stats)})
+  output$plot_player_matchup_left <- renderPlot({player_stats_spider_plot(player_matchup_left() ,best_stats_in_season(), stats_cols = input$select_stats, type=1)}) 
+  output$plot_player_matchup_right <- renderPlot({player_stats_spider_plot(player_matchup_right(), best_stats_in_season(), stats_cols = input$select_stats, type=1)})
 }
 
